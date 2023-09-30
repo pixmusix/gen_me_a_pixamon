@@ -1,3 +1,4 @@
+use std::env;
 use bmp::Image;
 use bmp::Pixel;
 use fastrand;
@@ -16,17 +17,38 @@ fn fmap(a_rge: (f32, f32), b_rge: (f32, f32), c: f32) -> f32 {
     b_rge.0 + (c - a_rge.0) * (b_rge.1 - b_rge.0) / (a_rge.1 - a_rge.0)
 }
 
-// fn bmp_upscale(bmp : Image, fct : f32) -> Image {
-//     // upscale image using proximal interpolation.
+fn bmp_resize(bmp : Image, fct : f32) -> Image {
+    // upscale image using proximal interpolation.
 
-//     // clean variables 
-//     let w : f32 = bmp.get_width() as f32;
-//     let h : f32 = bmp.get_height() as f32;
-//     let x : u32 = (fct * w).floor() as u32;
-//     let y : u32 = (fct * h).floor() as u32;
+    // get dimensions
+    let bmp_w : f32 = bmp.get_width() as f32;
+    let bmp_h : f32 = bmp.get_height() as f32;
+    let new_w : f32 = (fct * bmp_w).floor();
+    let new_h : f32 = (fct * bmp_h).floor();
 
-//     return up_bmp;
-// }
+    // init a scaled image to output
+    let mut img = Image::new(new_w as u32, new_h as u32);
+
+    // assign colours to scaled image by indexing the input image
+    let mut j : f32 = 0.0;
+    while j < new_h {
+        let mut i : f32 = 0.0;
+        while i < new_h {
+            //find nearest neighbour
+            let x : u32 = fmap((0.0,new_w), (0.0,bmp_w), i).floor() as u32;
+            let y : u32 = fmap((0.0,new_h), (0.0,bmp_h), j).floor() as u32;
+
+            // take neighbours pixel
+            let pix : Pixel = bmp.get_pixel(x, y);
+            img.set_pixel(i as u32, j as u32, pix);
+
+            i = i + 1.0;
+        }
+        j = j + 1.0;
+    }
+
+    return img;
+}
 
 fn make_monster(seed : u64, size : u32, loc : Vec2) -> Image {
     
@@ -49,7 +71,7 @@ fn make_monster(seed : u64, size : u32, loc : Vec2) -> Image {
     // biased inputs
     let density : f32 = fmap((0.0,1.0), (0.3,0.8), fastrand::f32());
     let y_bias : f32 = fmap((0.0,1.0), (0.2, -0.2), fastrand::f32());
-    let colour_rand : f32 = fmap((0.0,1.0), (0.3, 0.9), fastrand::f32());
+    let colour_rand : f32 = fmap((0.0,1.0), (0.75, 0.95), fastrand::f32());
 
     //Loop through pixels
     for k in 0..(w*h) {
@@ -77,23 +99,29 @@ fn make_monster(seed : u64, size : u32, loc : Vec2) -> Image {
             
             // draw
             let pix = Pixel::new(r, g, b);
-            monster.set_pixel(loc.x + x, loc.y + y, pix);
-            monster.set_pixel(loc.x - x, loc.y + y, pix);
+            let px_left : u32 = (loc.x + x) % monster.get_width();
+            let px_right : u32 = (loc.x - x) % monster.get_width();
+            let py : u32 = (loc.y + y) % monster.get_height();
+            monster.set_pixel(px_left, py, pix);
+            monster.set_pixel(px_right, py, pix);
         }
     }
     return monster;
 }
 
 fn main() {
-    let seed : u64 = 0;
-    let size : u32 = 32;
-    let location : Vec2 = make_vec(size / 2, size / 4);
-    let _monster : Image = make_monster(seed, size, location);
+    env::set_var("RUST_BACKTRACE", "1");
+    for k in 0..10 {
+        let seed : u64 = k;
+        let size : u32 = 32;
+        let location : Vec2 = make_vec(size / 2, size / 4);
+        let monster : Image = make_monster(seed, size, location);
 
-    // let img_size : u32 = 128;
-    // let factor : f32 = (img_size as f32) / (size as f32);
-    // let img : Image = bmp_upscale(monster, factor);
+        let img_size : u32 = 128;
+        let factor : f32 = (img_size as f32) / (size as f32);
+        let img : Image = bmp_resize(monster, factor);
 
-    // let filename : String = format!("monsters/mon{}.bmp", seed);
-    // img.save(filename).ok();
+        let filename : String = format!("monsters/mon{}.bmp", seed);
+        img.save(filename).ok();
+    }   
 }
