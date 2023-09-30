@@ -2,16 +2,19 @@
 
 ## Generate Random Pixel Creatures
 
-Simple code that generate PNG Pixel Art of Little Monsters.
+Simple code that generates PNG Pixel Art of Little Monsters.
 Perfect for :
 - Table-Top RPGs :game_die:
 - Video Games :video_game:
 - Cryptography :key:
 - Database Visualisation :card_index_dividers:
 
-**Note :** *I used this to assign each [EAN Barcode](https://en.wikipedia.org/wiki/International_Article_Number) in a database manager a cool low-rez monster.*
+**Note :** *for a database API, I used this to assign each [EAN Barcode](https://en.wikipedia.org/wiki/International_Article_Number) a low-rez monster.*
 
 ### Dependencies
+
+- [bmp 0.5.0](https://crates.io/crates/bmp)
+- [fastrand 2.0.1](https://crates.io/crates/fastrand)
 
 ### How to use
 
@@ -33,6 +36,10 @@ if test -f monsters/mon0.bmp; then
   echo "Hurray! You made your first Pixamon!"
 fi
 ```
+
+### Examples
+
+![banner](assets/gen_me_a_pixamon_examples.jpg)
 
 ### Customise
 
@@ -79,8 +86,6 @@ let img : Image = bmp_resize(monster, factor);
 assert_eq!(img.get_width(), desired_img_size);
 assert_eq!(img.get_height(), desired_img_size);
 ```
-
-### Examples
 
 ### Credits
 *In loving memory of [PixelEncounter](https://pixelencounter.com/) by [Josh Gomez](https://github.com/XzaR90/PixelEncounter)*
