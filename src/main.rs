@@ -16,8 +16,16 @@ fn fmap(a_rge: (f32, f32), b_rge: (f32, f32), c: f32) -> f32 {
     b_rge.0 + (c - a_rge.0) * (b_rge.1 - b_rge.0) / (a_rge.1 - a_rge.0)
 }
 
-// fn bmp_upscale(bmp : Image, a_sz : u32, b_sz : u32) -> Image {
-    
+// fn bmp_upscale(bmp : Image, fct : f32) -> Image {
+//     // upscale image using proximal interpolation.
+
+//     // clean variables 
+//     let w : f32 = bmp.get_width() as f32;
+//     let h : f32 = bmp.get_height() as f32;
+//     let x : u32 = (fct * w).floor() as u32;
+//     let y : u32 = (fct * h).floor() as u32;
+
+//     return up_bmp;
 // }
 
 fn make_monster(seed : u64, size : u32, loc : Vec2) -> Image {
@@ -78,9 +86,14 @@ fn make_monster(seed : u64, size : u32, loc : Vec2) -> Image {
 
 fn main() {
     let seed : u64 = 0;
-    let size : u32 = 21;
+    let size : u32 = 32;
     let location : Vec2 = make_vec(size / 2, size / 4);
-    let img : Image = make_monster(seed, size, location);
-    let filename : String = format!("monsters/mon{}.bmp", seed);
-    img.save(filename).ok();
+    let _monster : Image = make_monster(seed, size, location);
+
+    // let img_size : u32 = 128;
+    // let factor : f32 = (img_size as f32) / (size as f32);
+    // let img : Image = bmp_upscale(monster, factor);
+
+    // let filename : String = format!("monsters/mon{}.bmp", seed);
+    // img.save(filename).ok();
 }
