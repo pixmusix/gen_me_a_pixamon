@@ -17,6 +17,16 @@ fn fmap(a_rge: (f32, f32), b_rge: (f32, f32), c: f32) -> f32 {
     b_rge.0 + (c - a_rge.0) * (b_rge.1 - b_rge.0) / (a_rge.1 - a_rge.0)
 }
 
+fn extract_seed_from_args(args : Vec<String>) -> u64 {
+    for arg in args {
+        match arg.parse::<u64>() {
+            Ok(seed) => return seed,
+            Err(_) => continue, 
+        } 
+    }
+    panic!("gen_me_a_pixamon requires an usigned 64bit int passed in as argument.")
+}
+
 fn bmp_resize(bmp : Image, fct : f32) -> Image {
     // upscale image using proximal interpolation.
 
@@ -111,17 +121,19 @@ fn make_monster(seed : u64, size : u32, loc : Vec2) -> Image {
 
 fn main() {
     env::set_var("RUST_BACKTRACE", "1");
-    for k in 0..10 {
-        let seed : u64 = k;
-        let size : u32 = 32;
-        let location : Vec2 = make_vec(size / 2, size / 4);
-        let monster : Image = make_monster(seed, size, location);
 
-        let img_size : u32 = 128;
-        let factor : f32 = (img_size as f32) / (size as f32);
-        let img : Image = bmp_resize(monster, factor);
+    // make a monster
+    let seed : u64 = extract_seed_from_args(env::args().collect());
+    let size : u32 = 32;
+    let location : Vec2 = make_vec(size / 2, 2);
+    let monster : Image = make_monster(seed, size, location);
 
-        let filename : String = format!("monsters/mon{}.bmp", seed);
-        img.save(filename).ok();
-    }   
+    // resize the monster to a desired resolution(img_size)
+    let img_size : u32 = 128;
+    let factor : f32 = (img_size as f32) / (size as f32);
+    let img : Image = bmp_resize(monster, factor);
+
+    // save to disk @ ./monsters/
+    let filename : String = format!("monsters/mon{}.bmp", seed);
+    img.save(filename).ok();
 }
